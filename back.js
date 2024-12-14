@@ -2,10 +2,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const buttonContainer = document.getElementById("button-container");
     const subButtonContainer = document.getElementById("sub-button-container");
     const graphContainer = document.getElementById("graph-container");
+    const buttonContainerBelow = document.createElement('div'); // Container for buttons below the graph
+    let points = []; // Points array that holds the generated points
+    let centroids = []; // Store centroids
 
     // Function to clear the graph container
     const clearGraph = () => {
         graphContainer.innerHTML = "";
+        buttonContainerBelow.innerHTML = ""; // Clear buttons when graph is cleared
     };
 
     // Function to generate 100 points in a uniform layout
@@ -19,39 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return points;
     };
-
-    const generateGaussianMixture = () => {
-        const points = [];
-        const centers = [
-            { x: 150, y: 150 },
-            { x: 350, y: 350 }
-        ];
-
-        centers.forEach(center => {
-            for (let i = 0; i < 50; i++) {
-                points.push({
-                    x: center.x + Math.random() * 50 - 25,
-                    y: center.y + Math.random() * 50 - 25
-                });
-            }
-        });
-
-        return points;
-    };
-
-    const generateSpiralLayout = () => {
-        const points = [];
-        const a = 0.5, b = 5; // Spiral parameters
-        for (let i = 0; i < 100; i++) {
-            const angle = 0.1 * i;
-            points.push({
-                x: 250 + (a + b * angle) * Math.cos(angle),
-                y: 250 + (a + b * angle) * Math.sin(angle)
-            });
-        }
-        return points;
-    };
-
 
     // Function to render points in the graph
     const renderGraph = (points) => {
@@ -69,11 +40,66 @@ document.addEventListener("DOMContentLoaded", () => {
             circle.setAttribute("cx", point.x);
             circle.setAttribute("cy", point.y);
             circle.setAttribute("r", 5); // Radius of the dot
-            circle.setAttribute("fill", "blue"); // Dot color
+            circle.setAttribute("fill", "black"); // Dot color
             svg.appendChild(circle);
         });
 
+        // Append centroids to the SVG
+        centroids.forEach(centroid => {
+            const centroidCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            centroidCircle.setAttribute("cx", centroid.x);
+            centroidCircle.setAttribute("cy", centroid.y);
+            centroidCircle.setAttribute("r", 10); // Larger radius for centroid
+            centroidCircle.setAttribute("fill", "red"); // Centroid color
+            svg.appendChild(centroidCircle);
+        });
+
         graphContainer.appendChild(svg);
+        // Add buttons under the graph after rendering
+        addButtonsBelowGraph();
+    };
+
+    // Function to add buttons under the graph
+    const addButtonsBelowGraph = () => {
+        // Define buttons
+        const buttons = [
+            { text: "Add Centroid", action: addCentroid },
+            { text: "Go", action: goAction },
+            { text: "Reset", action: resetGraph }
+        ];
+
+        // Create and append buttons
+        buttons.forEach(button => {
+            const btn = document.createElement("button");
+            btn.textContent = button.text;
+            btn.addEventListener("click", button.action);
+            buttonContainerBelow.appendChild(btn);
+        });
+
+        // Append the button container to the DOM after the graph
+        graphContainer.parentNode.insertBefore(buttonContainerBelow, graphContainer.nextSibling);
+    };
+
+    // Add a randomly placed centroid to the graph
+    const addCentroid = () => {
+        const centroid = {
+            x: Math.random() * 500,
+            y: Math.random() * 500
+        };
+        centroids.push(centroid); // Add the new centroid
+        renderGraph(points); // Re-render the graph with the existing points and the new centroid
+    };
+
+    // Placeholder for the "Go" button functionality
+    const goAction = () => {
+        console.log("Go button clicked!");
+        // Add any logic you want for the "Go" button
+    };
+
+    // Reset the graph and remove centroids
+    const resetGraph = () => {
+        centroids = [];
+        renderGraph(points); // Re-render the graph with no centroids
     };
 
     // Event listener for main buttons
@@ -90,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
     subButtonContainer.addEventListener("click", (event) => {
         const layout = event.target.dataset.layout;
         if (layout) {
-            let points;
             switch (layout) {
                 case "uniform":
                     points = generateUniformLayout();
@@ -101,7 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 case "spiral":
                     points = generateSpiralLayout();
                     break;
-                // Add more cases for other layouts
                 default:
                     console.log("Unknown layout:", layout);
                     return;
