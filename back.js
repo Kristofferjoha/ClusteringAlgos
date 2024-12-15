@@ -5,134 +5,147 @@ document.addEventListener("DOMContentLoaded", () => {
     const buttonContainerBelow = document.createElement('div'); // Container for buttons below the graph
     let points = []; // Points array that holds the generated points
     let centroids = []; // Store centroids
+    const PADDING = 10;
 
-    // Function to clear the graph container
-    const clearGraph = () => {
-        graphContainer.innerHTML = "";
-        buttonContainerBelow.innerHTML = ""; // Clear buttons when graph is cleared
-    };
+// Function to clear the graph container
+const clearGraph = () => {
+    graphContainer.innerHTML = "";
+    buttonContainerBelow.innerHTML = ""; // Clear buttons when graph is cleared
+};
 
-    // Function to generate 100 points in a uniform layout
-    const generateUniformLayout = () => {
-        const points = [];
-        for (let i = 0; i < 100; i++) {
-            points.push({
-                x: Math.random() * 500, // Random x within the SVG dimensions
-                y: Math.random() * 500  // Random y within the SVG dimensions
-            });
-        }
-        return points;
-    };
+// Function to generate 100 points in a uniform layout
+const generateUniformLayout = () => {
+    const graphWidth = 500 - 2 * PADDING; // Adjust for padding
+    const points = [];
+    for (let i = 0; i < 100; i++) {
+        points.push({
+            x: Math.random() * graphWidth + PADDING, // Add padding
+            y: Math.random() * graphWidth + PADDING  // Add padding
+        });
+    }
+    return points;
+};
 
-    const generateGaussianMixture = () => {
-        const points = [];
-        const numClusters = 3; // Number of clusters
-        const clusterSpread = 50; // Spread of the points around the center
-    
-        for (let i = 0; i < numClusters; i++) {
-            const centerX = Math.random() * 500;
-            const centerY = Math.random() * 500;
-    
-            for (let j = 0; j < 30; j++) { // Generate 30 points per cluster
-                const x = centerX + (Math.random() - 0.5) * clusterSpread;
-                const y = centerY + (Math.random() - 0.5) * clusterSpread;
-                points.push({ x, y });
-            }
-        }
-    
-        return points;
-    };
+const generateGaussianMixture = () => {
+    const points = [];
+    const numClusters = 3; // Number of clusters
+    const clusterSpread = 100; // Spread of the points around the center
+    const graphWidth = 500 - 2 * PADDING; // Adjust for padding
 
-    const generateSmileyLayout = () => {
-        const points = [];
-        const radius = 100;
-        const eyeRadius = 15;
-        
-        // Smiley face outer circle
-        for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-            const x = 250 + radius * Math.cos(angle);
-            const y = 250 + radius * Math.sin(angle);
+    for (let i = 0; i < numClusters; i++) {
+        const centerX = Math.random() * graphWidth + PADDING;
+        const centerY = Math.random() * graphWidth + PADDING;
+
+        for (let j = 0; j < 40; j++) { // Generate 40 points per cluster
+            const x = centerX + (Math.random() - 0.5) * clusterSpread;
+            const y = centerY + (Math.random() - 0.5) * clusterSpread;
             points.push({ x, y });
         }
-    
-        // Left eye
-        for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-            const x = 200 + eyeRadius * Math.cos(angle);
-            const y = 200 + eyeRadius * Math.sin(angle);
-            points.push({ x, y });
-        }
-    
-        // Right eye
-        for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-            const x = 300 + eyeRadius * Math.cos(angle);
-            const y = 200 + eyeRadius * Math.sin(angle);
-            points.push({ x, y });
-        }
-    
-        // Smile
-        for (let angle = Math.PI / 4; angle < Math.PI * 3 / 4; angle += 0.1) {
-            const x = 200 + 80 * Math.cos(angle);
-            const y = 350 + 40 * Math.sin(angle);
-            points.push({ x, y });
-        }
-    
-        return points;
-    };
+    }
 
-    const generateSpiralLayout = () => {
-        const points = [];
-        const numPoints = 200;
-        const spiralFactor = 5; // Controls the distance between coils
-    
-        for (let i = 0; i < numPoints; i++) {
-            const angle = 0.1 * i; // Increasing angle for spiral
-            const radius = spiralFactor * Math.sqrt(i); // Increasing radius
-            const x = 250 + radius * Math.cos(angle);
-            const y = 250 + radius * Math.sin(angle);
+    return points;
+};
+
+const generateSmileyLayout = () => {
+    const points = [];
+    const radius = 100;
+    const eyeRadius = 15;
+
+    // Smiley face outer circle
+    for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+        const x = 250 + radius * Math.cos(angle);
+        const y = 250 + radius * Math.sin(angle);
+        points.push({ x, y });
+    }
+
+    // Left eye
+    for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+        const x = 200 + eyeRadius * Math.cos(angle);
+        const y = 200 + eyeRadius * Math.sin(angle);
+        points.push({ x, y });
+    }
+
+    // Right eye
+    for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+        const x = 300 + eyeRadius * Math.cos(angle);
+        const y = 200 + eyeRadius * Math.sin(angle);
+        points.push({ x, y });
+    }
+
+    // Smile
+    for (let angle = Math.PI / 4; angle < Math.PI * 3 / 4; angle += 0.1) {
+        const x = 200 + 80 * Math.cos(angle);
+        const y = 350 + 40 * Math.sin(angle);
+        points.push({ x, y });
+    }
+
+    return points.map(point => ({
+        x: Math.max(PADDING, Math.min(500 - PADDING, point.x)),
+        y: Math.max(PADDING, Math.min(500 - PADDING, point.y))
+    }));
+};
+
+const generateSpiralLayout = () => {
+    const points = [];
+    const numPoints = 200;
+    const spiralFactor = 5; // Controls the distance between coils
+
+    for (let i = 0; i < numPoints; i++) {
+        const angle = 0.1 * i; // Increasing angle for spiral
+        const radius = spiralFactor * Math.sqrt(i); // Increasing radius
+        const x = 250 + radius * Math.cos(angle);
+        const y = 250 + radius * Math.sin(angle);
+        points.push({ x, y });
+    }
+
+    return points.map(point => ({
+        x: Math.max(PADDING, Math.min(500 - PADDING, point.x)),
+        y: Math.max(PADDING, Math.min(500 - PADDING, point.y))
+    }));
+};
+
+const generateGridLayout = () => {
+    const points = [];
+    const gridSize = 10; // Number of rows and columns
+    const spacing = (500 - 2 * PADDING) / (gridSize - 1); // Distance between points
+
+    for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+            const x = PADDING + i * spacing;
+            const y = PADDING + j * spacing;
             points.push({ x, y });
         }
-    
-        return points;
-    };
+    }
 
-    const generateGridLayout = () => {
-        const points = [];
-        const gridSize = 10; // Number of rows and columns
-        const spacing = 50; // Distance between points
-    
-        for (let i = 0; i < gridSize; i++) {
-            for (let j = 0; j < gridSize; j++) {
-                const x = i * spacing;
-                const y = j * spacing;
-                points.push({ x, y });
-            }
-        }
-    
-        return points;
-    };
-    
+    return points;
+};
 
-    const generateClusteredCircles = () => {
-        const points = [];
-        const numClusters = 4;
-        const clusterRadius = 30;
-        const numPoints = 30;
-    
-        for (let i = 0; i < numClusters; i++) {
-            const centerX = Math.random() * 500;
-            const centerY = Math.random() * 500;
-    
-            for (let j = 0; j < numPoints; j++) {
-                const angle = Math.random() * Math.PI * 2;
-                const radius = Math.random() * clusterRadius;
-                const x = centerX + radius * Math.cos(angle);
-                const y = centerY + radius * Math.sin(angle);
-                points.push({ x, y });
-            }
+const generateClusteredCircles = () => {
+    const points = [];
+    const numClusters = 4;
+    const clusterRadius = 30;
+    const numPoints = 30;
+    const graphWidth = 500 - 2 * PADDING; // Adjust for padding
+
+    for (let i = 0; i < numClusters; i++) {
+        const centerX = Math.random() * graphWidth + PADDING;
+        const centerY = Math.random() * graphWidth + PADDING;
+
+        for (let j = 0; j < numPoints; j++) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = Math.random() * clusterRadius;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            points.push({ x, y });
         }
-    
-        return points;
-    };
+    }
+
+    return points.map(point => ({
+        x: Math.max(PADDING, Math.min(500 - PADDING, point.x)),
+        y: Math.max(PADDING, Math.min(500 - PADDING, point.y))
+    }));
+};
+
     
     
     
@@ -248,14 +261,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const goAction = () => {
         // Step 1: Assign points to the closest centroid
         const clusters = Array(centroids.length).fill().map(() => []); // Create an empty cluster for each centroid
-    
+        
         points.forEach(point => {
             const closestCentroid = getClosestCentroid(point.x, point.y);
             const centroidIndex = centroids.indexOf(closestCentroid);
             clusters[centroidIndex].push(point); // Add the point to the corresponding centroid's cluster
-    
-            // Update point color based on the closest centroid
-            point.color = closestCentroid.color; // Assign the color of the closest centroid to the point
         });
     
         // Step 2: Recalculate the centroids based on the assigned points
@@ -271,11 +281,23 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     
-        // Step 3: Re-render the graph with updated points' colors and centroids
+        // Reassign the points to their nearest centroid and update the colors
+        reassignPoints();
+    
+        // Re-render the graph with updated centroids but without updating point colors yet
         renderGraph();
     };
     
 
+    const reassignPoints = () => {
+    points.forEach(point => {
+        const closestCentroid = getClosestCentroid(point.x, point.y);
+        point.color = closestCentroid.color; // Assign the color of the closest centroid to the point
+    });
+
+    // Re-render the graph with the updated point colors
+    renderGraph();
+};
     // Reset the graph and remove centroids
     const resetGraph = () => {
         centroids = [];

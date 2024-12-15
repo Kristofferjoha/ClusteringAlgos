@@ -10,12 +10,12 @@
 <body>
 <h1>Clustering Visualizer</h1>
 <div id="button-container">
+    <h3>Select Algorithm</h3>
     <button class="button" data-cluster="kmeans">K Means</button>
-    <button class="button" data-cluster="gaussian">Gaussian</button>
-    <button class="button" data-cluster="spectral">Spectral</button>
 </div>
 
 <div id="sub-button-container">
+    <h3>Select Point Layout</h3>
     <button class="button" data-layout="uniform">Uniform Distribution</button>
     <button class="button" data-layout="gaussian-mixture">Gaussian Mixture</button>
     <button class="button" data-layout="smiley">Smiley Layout</button>
@@ -25,6 +25,14 @@
 </div>
 <div id="graph-container">
     <!-- Graph will be rendered here -->
+</div>
+
+<div id="algorithmText">
+    <!-- This will show dynamic text for the algorithm -->
+</div>
+
+<div id="pointLayoutText">
+    <!-- This will show dynamic text for the point layout -->
 </div>
 </body>
 </html>

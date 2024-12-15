@@ -18,20 +18,26 @@ body {
     margin-top: 20px;
 }
 
-.button {
+button {
     padding: 10px 20px;
     margin: 5px;
     font-size: 16px;
     cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+}
+
+button:hover {
     background-color: #f0f0f0;
 }
 
-.button:hover {
-    background-color: #e0e0e0;
+button.active {
+    background-color: #3498db;
+    color: white;
 }
 
+#algorithmText, #pointLayoutText {
+    margin-top: 20px;
+    font-size: 14px;
+}
 svg {
     display: block;
     margin: 0 auto;
