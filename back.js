@@ -122,7 +122,7 @@ const generateGridLayout = () => {
 
 const generateClusteredCircles = () => {
     const points = [];
-    const numClusters = 4;
+    const numClusters = 6;
     const clusterRadius = 30;
     const numPoints = 30;
     const graphWidth = 500 - 2 * PADDING; // Adjust for padding
@@ -169,93 +169,99 @@ const generateClusteredCircles = () => {
     };
 
     // Function to render the proximity areas and the points
-    const renderGraph = () => {
-        clearGraph();
+const renderGraph = () => {
+    clearGraph();
 
-        // Create an SVG element for the graph
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", 500);
-        svg.setAttribute("height", 500);
-        svg.style.border = "1px solid black";
+    // Create an SVG element for the graph
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", 500);
+    svg.setAttribute("height", 500);
+    svg.style.border = "1px solid black";
 
-        // Create the background proximity grid with distinct regions for each centroid
-        const resolution = 3; // Resolution of the grid
-        for (let x = 0; x <= 500; x += resolution) {
-            for (let y = 0; y <= 500; y += resolution) {
-                const closestCentroid = getClosestCentroid(x, y);
-                if (closestCentroid) {
-                    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                    rect.setAttribute("x", x);
-                    rect.setAttribute("y", y);
-                    rect.setAttribute("width", resolution);
-                    rect.setAttribute("height", resolution);
+    // Create the background proximity grid with distinct regions for each centroid
+    const resolution = 3; // Resolution of the grid
+    for (let x = 0; x <= 500; x += resolution) {
+        for (let y = 0; y <= 500; y += resolution) {
+            const closestCentroid = getClosestCentroid(x, y);
+            if (closestCentroid) {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", y);
+                rect.setAttribute("width", resolution);
+                rect.setAttribute("height", resolution);
 
-                    // Assign each centroid's proximity area a clear, saturated color
-                    rect.setAttribute("fill", closestCentroid.color);
-                    rect.setAttribute("stroke", closestCentroid.color);
-                    rect.setAttribute("opacity", 0.3); // Adjust opacity for background area
-                    svg.appendChild(rect);
-                }
+                // Assign each centroid's proximity area a clear, saturated color
+                rect.setAttribute("fill", closestCentroid.color);
+                rect.setAttribute("stroke", closestCentroid.color);
+                rect.setAttribute("opacity", 0.3); // Adjust opacity for background area
+                svg.appendChild(rect);
             }
         }
+    }
 
-        // Append points to the SVG
-        points.forEach(point => {
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", point.x);
-            circle.setAttribute("cy", point.y);
-            circle.setAttribute("r", 5); // Radius of the dot
-            circle.setAttribute("fill", point.color || "black");
-            svg.appendChild(circle);
-        });
+    // Append points to the SVG
+    points.forEach(point => {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", point.x);
+        circle.setAttribute("cy", point.y);
+        circle.setAttribute("r", 5); // Radius of the dot
+        circle.setAttribute("fill", point.color || "black");
+        svg.appendChild(circle);
+    });
 
-        // Append centroids to the SVG
-        centroids.forEach(centroid => {
-            const centroidCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            centroidCircle.setAttribute("cx", centroid.x);
-            centroidCircle.setAttribute("cy", centroid.y);
-            centroidCircle.setAttribute("r", 10); // Larger radius for centroid
-            centroidCircle.setAttribute("fill", centroid.color); // Centroid color
-            svg.appendChild(centroidCircle);
-        });
+    // Append centroids to the SVG
+    centroids.forEach(centroid => {
+        const centroidCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        centroidCircle.setAttribute("cx", centroid.x);
+        centroidCircle.setAttribute("cy", centroid.y);
+        centroidCircle.setAttribute("r", 10); // Larger radius for centroid
+        centroidCircle.setAttribute("fill", centroid.color); // Centroid color
+        svg.appendChild(centroidCircle);
+    });
 
-        graphContainer.appendChild(svg);
-        // Add buttons under the graph after rendering
-        addButtonsBelowGraph();
+    graphContainer.appendChild(svg);
+    // Add buttons under the graph after rendering
+    addButtonsBelowGraph();
+};
+
+// Function to add buttons under the graph
+const addButtonsBelowGraph = () => {
+    // Define buttons
+    const buttons = [
+        { text: "Add Centroid", action: addCentroid },
+        { text: "Go", action: goAction },
+        { text: "Reset", action: resetGraph }
+    ];
+
+    // Create and append buttons
+    buttons.forEach(button => {
+        const btn = document.createElement("button");
+        btn.textContent = button.text;
+        btn.addEventListener("click", button.action);
+        buttonContainerBelow.appendChild(btn);
+    });
+
+    // Append the button container to the DOM after the graph
+    graphContainer.parentNode.insertBefore(buttonContainerBelow, graphContainer.nextSibling);
+};
+
+// Add a randomly placed centroid to the graph
+const addCentroid = () => {
+    if (centroids.length >= 7) {
+        alert("You can only add up to 7 centroids.");
+        return; // Prevent adding more than 7 centroids
+    }
+
+    const colors = ["red", "blue", "green", "purple", "orange", "gray", "pink"];
+    const centroid = {
+        x: Math.random() * 500,
+        y: Math.random() * 500,
+        color: colors[centroids.length % colors.length]
     };
+    centroids.push(centroid); // Add the new centroid
+    renderGraph(); // Re-render the graph with the existing points and the new centroid
+};
 
-    // Function to add buttons under the graph
-    const addButtonsBelowGraph = () => {
-        // Define buttons
-        const buttons = [
-            { text: "Add Centroid", action: addCentroid },
-            { text: "Go", action: goAction },
-            { text: "Reset", action: resetGraph }
-        ];
-
-        // Create and append buttons
-        buttons.forEach(button => {
-            const btn = document.createElement("button");
-            btn.textContent = button.text;
-            btn.addEventListener("click", button.action);
-            buttonContainerBelow.appendChild(btn);
-        });
-
-        // Append the button container to the DOM after the graph
-        graphContainer.parentNode.insertBefore(buttonContainerBelow, graphContainer.nextSibling);
-    };
-
-    // Add a randomly placed centroid to the graph
-    const addCentroid = () => {
-        const colors = ["red", "blue", "green", "purple", "orange"];
-        const centroid = {
-            x: Math.random() * 500,
-            y: Math.random() * 500,
-            color: colors[centroids.length % colors.length]
-        };
-        centroids.push(centroid); // Add the new centroid
-        renderGraph(); // Re-render the graph with the existing points and the new centroid
-    };
 
     // Implement the K-means algorithm when the "Go" button is clicked
     const goAction = () => {
@@ -286,6 +292,7 @@ const generateClusteredCircles = () => {
     
         // Re-render the graph with updated centroids but without updating point colors yet
         renderGraph();
+    
     };
     
 
