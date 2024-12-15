@@ -24,40 +24,81 @@ document.addEventListener("DOMContentLoaded", () => {
         return points;
     };
 
-    // Function to render points in the graph
-    const renderGraph = (points) => {
-        clearGraph();
+    // Function to calculate the closest centroid for a given point
+    const getClosestCentroid = (x, y) => {
+        let closest = null;
+        let minDistance = Infinity;
 
-        // Create an SVG element for the graph
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", 500);
-        svg.setAttribute("height", 500);
-        svg.style.border = "1px solid black";
-
-        // Append points to the SVG
-        points.forEach(point => {
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", point.x);
-            circle.setAttribute("cy", point.y);
-            circle.setAttribute("r", 5); // Radius of the dot
-            circle.setAttribute("fill", "black"); // Dot color
-            svg.appendChild(circle);
-        });
-
-        // Append centroids to the SVG
         centroids.forEach(centroid => {
-            const centroidCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            centroidCircle.setAttribute("cx", centroid.x);
-            centroidCircle.setAttribute("cy", centroid.y);
-            centroidCircle.setAttribute("r", 10); // Larger radius for centroid
-            centroidCircle.setAttribute("fill", "red"); // Centroid color
-            svg.appendChild(centroidCircle);
+            const distance = Math.sqrt(
+                Math.pow(x - centroid.x, 2) + Math.pow(y - centroid.y, 2)
+            );
+            if (distance < minDistance) {
+                minDistance = distance;
+                closest = centroid;
+            }
         });
 
-        graphContainer.appendChild(svg);
-        // Add buttons under the graph after rendering
-        addButtonsBelowGraph();
+        return closest;
     };
+
+
+
+    // Function to render the proximity areas and the points
+    const renderGraph = () => {
+    clearGraph();
+
+    // Create an SVG element for the graph
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", 500);
+    svg.setAttribute("height", 500);
+    svg.style.border = "1px solid black";
+
+    // Create the background proximity grid with distinct regions for each centroid
+    const resolution = 5; // Resolution of the grid
+    for (let x = 0; x <= 500; x += resolution) {
+        for (let y = 0; y <= 500; y += resolution) {
+            const closestCentroid = getClosestCentroid(x, y);
+            if (closestCentroid) {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", y);
+                rect.setAttribute("width", resolution);
+                rect.setAttribute("height", resolution);
+
+                // Assign each centroid's proximity area a clear, saturated color
+                rect.setAttribute("fill", closestCentroid.color);
+                rect.setAttribute("stroke", closestCentroid.color);
+                rect.setAttribute("opacity", 0.3); // Adjust opacity for background area
+                svg.appendChild(rect);
+            }
+        }
+    }
+
+    // Append points to the SVG
+    points.forEach(point => {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", point.x);
+        circle.setAttribute("cy", point.y);
+        circle.setAttribute("r", 5); // Radius of the dot
+        circle.setAttribute("fill", "black"); // Dot color
+        svg.appendChild(circle);
+    });
+
+    // Append centroids to the SVG
+    centroids.forEach(centroid => {
+        const centroidCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        centroidCircle.setAttribute("cx", centroid.x);
+        centroidCircle.setAttribute("cy", centroid.y);
+        centroidCircle.setAttribute("r", 10); // Larger radius for centroid
+        centroidCircle.setAttribute("fill", centroid.color); // Centroid color
+        svg.appendChild(centroidCircle);
+    });
+
+    graphContainer.appendChild(svg);
+    // Add buttons under the graph after rendering
+    addButtonsBelowGraph();
+};
 
     // Function to add buttons under the graph
     const addButtonsBelowGraph = () => {
@@ -82,12 +123,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add a randomly placed centroid to the graph
     const addCentroid = () => {
+        const colors = ["red", "blue", "green", "purple", "orange"];
         const centroid = {
             x: Math.random() * 500,
-            y: Math.random() * 500
+            y: Math.random() * 500,
+            color: colors[centroids.length % colors.length]
         };
         centroids.push(centroid); // Add the new centroid
-        renderGraph(points); // Re-render the graph with the existing points and the new centroid
+        renderGraph(); // Re-render the graph with the existing points and the new centroid
     };
 
     // Placeholder for the "Go" button functionality
@@ -99,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Reset the graph and remove centroids
     const resetGraph = () => {
         centroids = [];
-        renderGraph(points); // Re-render the graph with no centroids
+        renderGraph(); // Re-render the graph with no centroids
     };
 
     // Event listener for main buttons
@@ -120,17 +163,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 case "uniform":
                     points = generateUniformLayout();
                     break;
-                case "gaussian-mixture":
-                    points = generateGaussianMixture();
-                    break;
-                case "spiral":
-                    points = generateSpiralLayout();
-                    break;
+                // Other layouts can be added here
                 default:
                     console.log("Unknown layout:", layout);
                     return;
             }
-            renderGraph(points);
+            renderGraph();
         }
     });
 });
