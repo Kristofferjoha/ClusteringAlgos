@@ -179,7 +179,7 @@ const renderGraph = () => {
     svg.style.border = "1px solid black";
 
     // Create the background proximity grid with distinct regions for each centroid
-    const resolution = 3; // Resolution of the grid
+    const resolution = 6; // Resolution of the grid
     for (let x = 0; x <= 500; x += resolution) {
         for (let y = 0; y <= 500; y += resolution) {
             const closestCentroid = getClosestCentroid(x, y);
