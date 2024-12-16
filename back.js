@@ -17,7 +17,7 @@ const clearGraph = () => {
 const generateUniformLayout = () => {
     const graphWidth = 500 - 2 * PADDING; // Adjust for padding
     const points = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 150; i++) {
         points.push({
             x: Math.random() * graphWidth + PADDING, // Add padding
             y: Math.random() * graphWidth + PADDING  // Add padding
@@ -50,32 +50,39 @@ const generateSmileyLayout = () => {
     const points = [];
     const radius = 100;
     const eyeRadius = 15;
+    const centerX = 250;
+    const centerY = 250;
+    const PADDING = 10;  // Adjust padding if needed
 
     // Smiley face outer circle
     for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-        const x = 250 + radius * Math.cos(angle);
-        const y = 250 + radius * Math.sin(angle);
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
         points.push({ x, y });
     }
 
     // Left eye
     for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-        const x = 200 + eyeRadius * Math.cos(angle);
-        const y = 200 + eyeRadius * Math.sin(angle);
+        const x = centerX - 50 + eyeRadius * Math.cos(angle);  // Adjust x to center left eye
+        const y = centerY - 50 + eyeRadius * Math.sin(angle);  // Adjust y to center left eye
         points.push({ x, y });
     }
 
     // Right eye
     for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-        const x = 300 + eyeRadius * Math.cos(angle);
-        const y = 200 + eyeRadius * Math.sin(angle);
+        const x = centerX + 50 + eyeRadius * Math.cos(angle);  // Adjust x to center right eye
+        const y = centerY - 50 + eyeRadius * Math.sin(angle);  // Adjust y to center right eye
         points.push({ x, y });
     }
 
-    // Smile
+    // Smile (now centered with respect to the face)
+    const smileRadiusX = 80;  // Horizontal radius of the smile
+    const smileRadiusY = 40;  // Vertical radius of the smile
+    const smileCenterY = centerY + 40;  // Smile's vertical position, adjusted downward
+
     for (let angle = Math.PI / 4; angle < Math.PI * 3 / 4; angle += 0.1) {
-        const x = 200 + 80 * Math.cos(angle);
-        const y = 350 + 40 * Math.sin(angle);
+        const x = centerX + smileRadiusX * Math.cos(angle);
+        const y = smileCenterY + smileRadiusY * Math.sin(angle)-50;
         points.push({ x, y });
     }
 
@@ -84,6 +91,7 @@ const generateSmileyLayout = () => {
         y: Math.max(PADDING, Math.min(500 - PADDING, point.y))
     }));
 };
+
 
 const generateSpiralLayout = () => {
     const points = [];
